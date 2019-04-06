@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Todo</string>
+    <string name="add_task">Add Task</string>
+    <string name="save">Save</string>
+    <string name="enter_task_here">Enter task here.</string>
+    <string name="task_title_required">Task Title required</string>
+</resources>
