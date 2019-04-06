@@ -1,9 +1,14 @@
 package com.mameen.todolist.ui.activities;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -101,6 +106,61 @@ public class TodoListActivity extends AppCompatActivity {
                         , Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        new GetUndoneTasksCount().execute();
+    }
+
+    private class GetUndoneTasksCount extends AsyncTask<Void, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            int taskList = DatabaseClient
+                    .getInstance(TodoListActivity.this)
+                    .getAppDatabase()
+                    .taskDao()
+                    .getCountUndoneTasks();
+
+            return taskList;
+        }
+
+        @Override
+        protected void onPostExecute(Integer tasks) {
+            super.onPostExecute(tasks);
+
+            Log.e(TAG, "tasks: " + tasks);
+
+            if (tasks > 0) {
+                try {
+                    notifiy(tasks);
+                } catch (Exception e){
+                    Log.e(TAG, "Error: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private void notifiy(int count) {
+        Intent intent = new Intent(getApplicationContext(), TodoListActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder b = new NotificationCompat.Builder(getApplicationContext());
+
+        b.setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle("Todo App")
+                .setContentText("Count of undone tasks is: " + count)
+                .setContentIntent(contentIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext()
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(900, b.build());
     }
 
 }

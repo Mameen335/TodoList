@@ -16,6 +16,9 @@ public interface TaskDao {
     @Query("SELECT * FROM task")
     List<Task> getAll();
 
+    @Query("SELECT COUNT(*) FROM task WHERE done = 0")
+    int getCountUndoneTasks();
+
     @Insert
     void insert(Task task);
 
